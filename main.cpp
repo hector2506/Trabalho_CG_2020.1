@@ -47,7 +47,7 @@ int main(int argc, char* args[]){
 	SDL_SetVideoMode(Width, Height, 32, SDL_OPENGL);
 	
 	// cor da janela
-	glClearColor(1,1,1,1);
+	glClearColor(0,0,0,1);
 	
 	// area exibida
 	glViewport(0,0,Width,Height);
@@ -100,7 +100,7 @@ int main(int argc, char* args[]){
 	
 	// loop do jogo
 	while(executando){
-		// EVENTOS DO SDL - KEYBINDS E ETC
+		// --- EVENTOS DO SDL - KEYBINDS E ETC ---
 		while(SDL_PollEvent(&eventos)){
 			// fecha com o X da janela
 			if(eventos.type == SDL_QUIT){
@@ -162,19 +162,30 @@ int main(int argc, char* args[]){
 				}
 			}
 		}
+		// --- EVENTOS DO SDL - KEYBINDS E ETC ---
 		
 		// LOGICA
 		
-		// MOVIMENTO DO PERSONAGEM
+		// --- MOVIMENTO DO PERSONAGEM ---
 		if(esq_per == true){
 			personagem.x -= 8;
+			if(atq_distancia == false){
+				projetil.x += 8;	
+			}	
 		}
 		else if(dir_per == true){
 			personagem.x += 8;
+			if(atq_distancia == false){
+				projetil.x += 8;	
+			}
 		}
 		else if(cima_per == true){
-			if(personagem.y > Height*0.55)
+			if(personagem.y > Height*0.55){
 				personagem.y -= 8;
+				if(atq_distancia == false){
+					projetil.y -= 8;	
+				}
+			}
 			else if(personagem.y <= Height*0.55)
 				cima_per = false;
 		}
@@ -185,8 +196,9 @@ int main(int argc, char* args[]){
 		else if(personagem.x<0){
 			personagem.x = 0;
 		}
+		// --- MOVIMENTO DO PERSONAGEM ---
 		
-		// MOVIMENTO DO INIMIGO
+		// --- MOVIMENTO DO INIMIGO ---
 		if(esq_ini == true){
 			inimigo.x -= 8;
 		}
@@ -206,6 +218,7 @@ int main(int argc, char* args[]){
 		else if(inimigo.x<0){
 			inimigo.x = 0;
 		}
+		// --- MOVIMENTO DO INIMIGO ---
 		
 		// COLISAO DO PERSONAGEM
 		if (colisao(personagem, inimigo) == true){
@@ -216,6 +229,8 @@ int main(int argc, char* args[]){
 		for(int i = 0; i < QUANT_BLOCOS; i++){
 			if(personagem.y+personagem.alt <= blocos[i].y){
 				personagem.y += 0.5;
+				if(atq_distancia == false)
+					projetil.y += 0.5;
 			}
 			if(inimigo.y+inimigo.alt <= blocos[i].y){
 				inimigo.y += 0.5;
@@ -231,29 +246,31 @@ int main(int argc, char* args[]){
 		// dimensoes da matriz
 		glOrtho(0, Width, Height, 0, -1, 1);
 		
-		// desenha o personagem
+		// --- DESENHA PERSONAGEM ---
+		glTranslatef(personagem.x,personagem.y,0);
 		glBegin(GL_QUADS);
-		
 		glColor3f(1, 0, 0);
-		glVertex2f(personagem.x, personagem.y);
-		glVertex2f(personagem.x+personagem.comp, personagem.y);
-		glVertex2f(personagem.x+personagem.comp, personagem.y+personagem.alt);
-		glVertex2f(personagem.x, personagem.y+personagem.alt);
-		
-		// encerra o desenho do personagem
+		glVertex2f(0, 0);
+		glVertex2f(personagem.comp, 0);
+		glVertex2f(personagem.comp, personagem.alt);
+		glVertex2f(0, personagem.alt);
 		glEnd();
+		glTranslatef(-personagem.x,-personagem.y,0);
+		// --- DESENHA PERSONAGEM ---
 		
-		// desenha o inimigo
+		// --- DESENHA INIMIGO ---
+		glTranslatef(inimigo.x,inimigo.y,0);
 		glBegin(GL_QUADS);
-		
 		glColor3f(0, 0, 1);
-		glVertex2f(inimigo.x, inimigo.y);
-		glVertex2f(inimigo.x+inimigo.comp, inimigo.y);
-		glVertex2f(inimigo.x+inimigo.comp, inimigo.y+inimigo.alt);
-		glVertex2f(inimigo.x, inimigo.y+inimigo.alt);
+		glVertex2f(0, 0);
+		glVertex2f(inimigo.comp, 0);
+		glVertex2f(inimigo.comp, inimigo.alt);
+		glVertex2f(0, inimigo.alt);
 		glEnd();
+		glTranslatef(-inimigo.x,-inimigo.y,0);
+		// --- DESENHA INIMIGO ---
 		
-		// desenha os blocos do cenario
+		// --- DESENHA CENARIO ---
 		glBegin(GL_QUADS);
 		glColor3f(0, 1, 0);
 		for(int i = 0; i < QUANT_BLOCOS; i++){
@@ -263,18 +280,32 @@ int main(int argc, char* args[]){
 			glVertex2f(blocos[i].x, blocos[i].y + blocos[i].alt);
 		}
 		glEnd();
+		// --- DESENHA CENARIO ---
 		
-		// cria o projetil
+		// --- CRIA PROJETIL ---
 		if(atq_distancia == true){
+			glTranslatef(projetil.x,projetil.y,0);
 			glBegin(GL_QUADS);
 			glColor3f(1, 1, 0);
-			glVertex2f(projetil.x, projetil.y-projetil.alt);
-			glVertex2f(projetil.x+projetil.comp, projetil.y-projetil.alt);
-			glVertex2f(projetil.x+projetil.comp, projetil.y+projetil.alt);
-			glVertex2f(projetil.x, projetil.y+projetil.alt);
+			glVertex2f(0, -projetil.alt);
+			glVertex2f(projetil.comp, -projetil.alt);
+			glVertex2f(projetil.comp, projetil.alt);
+			glVertex2f(0, projetil.alt);
 			glEnd();
+			glTranslatef(-projetil.x,-projetil.y,0);
 			if(colisao(projetil, inimigo) == false){
 				projetil.x += 5;
+				// evitar que o projetil saia da tela
+				if(projetil.x>Width-projetil.comp){
+					projetil.x = personagem.x+personagem.comp;
+					projetil.y = (personagem.y+(personagem.alt)/2);
+					atq_distancia = false;
+				}
+				else if(projetil.x<0){
+					projetil.x = personagem.x+personagem.comp;
+					projetil.y = (personagem.y+(personagem.alt)/2);
+					atq_distancia = false;
+				}
 			}
 			else if(colisao(projetil, inimigo) == true){
 				projetil.x = personagem.x+personagem.comp;
@@ -282,6 +313,7 @@ int main(int argc, char* args[]){
 				atq_distancia = false;
 			}
 		}
+		// --- CRIA PROJETIL ---
 		
 		// fecha matrix
 		glPopMatrix();
