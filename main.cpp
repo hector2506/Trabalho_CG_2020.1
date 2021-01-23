@@ -170,20 +170,20 @@ int main(int argc, char* args[]){
 		if(esq_per == true){
 			personagem.x -= 8;
 			if(atq_distancia == false){
-				projetil.x += 8;	
+				projetil.x = personagem.x+personagem.comp;	
 			}	
 		}
 		else if(dir_per == true){
 			personagem.x += 8;
 			if(atq_distancia == false){
-				projetil.x += 8;	
+				projetil.x = personagem.x+personagem.comp;	
 			}
 		}
 		else if(cima_per == true){
 			if(personagem.y > Height*0.55){
 				personagem.y -= 8;
 				if(atq_distancia == false){
-					projetil.y -= 8;	
+					projetil.y = (personagem.y+(personagem.alt)/2);	
 				}
 			}
 			else if(personagem.y <= Height*0.55)
@@ -230,7 +230,7 @@ int main(int argc, char* args[]){
 			if(personagem.y+personagem.alt <= blocos[i].y){
 				personagem.y += 0.5;
 				if(atq_distancia == false)
-					projetil.y += 0.5;
+					projetil.y = (personagem.y+(personagem.alt)/2);
 			}
 			if(inimigo.y+inimigo.alt <= blocos[i].y){
 				inimigo.y += 0.5;
