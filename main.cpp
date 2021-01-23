@@ -1,10 +1,16 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
+#include <stdio.h>
+#include <SDL/SDL_image.h>
 #include <stdlib.h>
+#include <string>
+
 
 #define Width 900
 #define Height 600
 #define QUANT_BLOCOS 10
+#define VEL 200
+
 
 struct Bloco{
 	float x;
@@ -13,6 +19,22 @@ struct Bloco{
 	float alt;
 };
 
+// Funcao para carregar textura
+GLuint loadTexture(const std::string&fileName){
+	SDL_Surface *imagem = IMG_Load(fileName.c_str()); // carrega a imagem
+	SDL_DisplayFormatAlpha(imagem); // formato alpha
+	unsigned object(0); // cria a textura
+	glGenTextures(1, &object); // gera textura
+	glBindTexture(GL_TEXTURE_2D, object); // tipo de textura
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imagem->w, imagem->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, imagem->pixels);
+	SDL_FreeSurface(imagem);
+	return object;
+}
+
 // A - personagem
 // B - inimigo
 bool colisao(Bloco A, Bloco B){
@@ -20,9 +42,9 @@ bool colisao(Bloco A, Bloco B){
 		return false;
 	else if(A.y > B.y+B.alt)
 		return false;
-	else if(A.x+A.comp < B.x) 
+	else if(A.x+A.comp <= B.x) 
 		return false;
-	else if(A.x > B.x+B.comp)
+	else if(A.x >= B.x+B.comp)
 		return false;
 		
 	return true;
@@ -62,9 +84,17 @@ int main(int argc, char* args[]){
 	// desabilitar 3D
 	glDisable(GL_DEPTH_TEST);
 	
+	// para uso da imagem
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	bool executando = true;
 	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false;
 	bool atq_distancia = false;
+	unsigned int projetil_textura = 0;
+	projetil_textura = loadTexture("Hadouken.png");
+	unsigned int projetil_textura2 = 0;
+	projetil_textura2 = loadTexture("Hadouken-2.png");
 	
 	SDL_Event eventos;
 	
@@ -73,30 +103,31 @@ int main(int argc, char* args[]){
 	personagem.x = Width*0.05;
 	personagem.y = Height*0.7;
 	personagem.comp = Width*0.1;
-	personagem.alt = Height*0.08;
+	personagem.alt = Height*0.2;
 	
 	// variaveis do inimigo
 	Bloco inimigo;
 	inimigo.x = Width*0.85;
 	inimigo.y = Height*0.7;
 	inimigo.comp = Width*0.1;
-	inimigo.alt = Height*0.08;
+	inimigo.alt = Height*0.2;
 	
+	// variaveis do projetil
 	Bloco projetil;
+	projetil.x = personagem.x+personagem.comp;
+	projetil.y = (personagem.y+(personagem.alt)/2);
+	projetil.comp = personagem.comp;
+	projetil.alt = personagem.alt/6;
 	
 	Bloco blocos[QUANT_BLOCOS];
 	
-	for(int i = 0, x = 0, y = Height*0.8; i < QUANT_BLOCOS; i++, x += Width/QUANT_BLOCOS){
+	for(int i = 0, x = 0, y = Height*0.9; i < QUANT_BLOCOS; i++, x += Width/QUANT_BLOCOS){
 		blocos[i].x = x;
 		blocos[i].y = y;
 		blocos[i].comp = Width*0.2;
 		blocos[i].alt = Height*0.2;
 	}
 	
-	projetil.x = personagem.x+personagem.comp;
-	projetil.y = (personagem.y+(personagem.alt)/2);
-	projetil.comp = 20;
-	projetil.alt = 10;
 	
 	// loop do jogo
 	while(executando){
@@ -220,7 +251,7 @@ int main(int argc, char* args[]){
 		}
 		// --- MOVIMENTO DO INIMIGO ---
 		
-		// COLISAO DO PERSONAGEM
+		// COLISAO
 		if (colisao(personagem, inimigo) == true){
 			personagem.x = inimigo.x - inimigo.comp;
 		}
@@ -247,21 +278,23 @@ int main(int argc, char* args[]){
 		glOrtho(0, Width, Height, 0, -1, 1);
 		
 		// --- DESENHA PERSONAGEM ---
+		glColor3f(0, 0, 1);
 		glTranslatef(personagem.x,personagem.y,0);
 		glBegin(GL_QUADS);
-		glColor3f(1, 0, 0);
 		glVertex2f(0, 0);
 		glVertex2f(personagem.comp, 0);
 		glVertex2f(personagem.comp, personagem.alt);
 		glVertex2f(0, personagem.alt);
 		glEnd();
 		glTranslatef(-personagem.x,-personagem.y,0);
+		
 		// --- DESENHA PERSONAGEM ---
+		
 		
 		// --- DESENHA INIMIGO ---
 		glTranslatef(inimigo.x,inimigo.y,0);
 		glBegin(GL_QUADS);
-		glColor3f(0, 0, 1);
+		glColor3f(1, 0, 0);
 		glVertex2f(0, 0);
 		glVertex2f(inimigo.comp, 0);
 		glVertex2f(inimigo.comp, inimigo.alt);
@@ -272,7 +305,7 @@ int main(int argc, char* args[]){
 		
 		// --- DESENHA CENARIO ---
 		glBegin(GL_QUADS);
-		glColor3f(0, 1, 0);
+		glColor3f(1,1,1);
 		for(int i = 0; i < QUANT_BLOCOS; i++){
 			glVertex2f(blocos[i].x, blocos[i].y);
 			glVertex2f(blocos[i].x + blocos[i].comp, blocos[i].y);
@@ -284,17 +317,27 @@ int main(int argc, char* args[]){
 		
 		// --- CRIA PROJETIL ---
 		if(atq_distancia == true){
+			glColor3f(1, 1, 1);
+			glEnable(GL_TEXTURE_2D);
+			glBindTexture(GL_TEXTURE_2D,projetil_textura);
+			
 			glTranslatef(projetil.x,projetil.y,0);
 			glBegin(GL_QUADS);
-			glColor3f(1, 1, 0);
+			glTexCoord2d(0,0);
 			glVertex2f(0, -projetil.alt);
+			glTexCoord2d(1,0);
 			glVertex2f(projetil.comp, -projetil.alt);
+			glTexCoord2d(1,1);
 			glVertex2f(projetil.comp, projetil.alt);
+			glTexCoord2d(0,1);
 			glVertex2f(0, projetil.alt);
+			
 			glEnd();
 			glTranslatef(-projetil.x,-projetil.y,0);
+			glDisable(GL_TEXTURE_2D);
+			
 			if(colisao(projetil, inimigo) == false){
-				projetil.x += 5;
+				projetil.x += 8;
 				// evitar que o projetil saia da tela
 				if(projetil.x>Width-projetil.comp){
 					projetil.x = personagem.x+personagem.comp;
