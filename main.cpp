@@ -10,6 +10,10 @@
 #define Height 600
 #define QUANT_BLOCOS 10
 #define VIDA 200
+#define RYU_X 0.055
+#define RYU_Y 0.17
+#define KEN_X 0.14
+#define KEN_Y 0.1
 
 
 struct Bloco{
@@ -69,7 +73,7 @@ int main(int argc, char* args[]){
 	SDL_SetVideoMode(Width, Height, 32, SDL_OPENGL);
 	
 	// cor da janela
-	glClearColor(1,1,1,1);
+	glClearColor(0,0,0,1);
 	
 	// area exibida
 	glViewport(0,0,Width,Height);
@@ -94,35 +98,35 @@ int main(int argc, char* args[]){
 	bool atq_per = false, atq_ini = false;
 	unsigned int projetil_per_textura = loadTexture("Hadouken.png");
 	unsigned int projetil_ini_textura = loadTexture("Hadouken-2.png");
-	unsigned int ryu_1 = loadTexture("Ryu-1.png");
-	unsigned int ryu_2 = loadTexture("Ryu-2.png");
-	unsigned int ken_1 = loadTexture("Ken-1.png");
-	unsigned int ken_2 = loadTexture("Ken-2.png");
+	unsigned int ryu_1 = loadTexture("Ryu.png");
+	//unsigned int ryu_2 = loadTexture("Ryu-2.png");
+	unsigned int ken_1 = loadTexture("Ken.png");
+	//unsigned int ken_2 = loadTexture("Ken-2.png");
 	
 	SDL_Event eventos;
 	
 	// variaveis do personagem
 	Bloco personagem, projetil_per;
 	personagem.x = Width*0.05;
-	personagem.y = Height*0.7;
+	personagem.y = Height*0.6;
 	personagem.comp = Width*0.1;
-	personagem.alt = Height*0.2;
+	personagem.alt = Height*0.3;
 	projetil_per.x = personagem.x+personagem.comp;
 	projetil_per.y = (personagem.y+(personagem.alt)/2);
 	projetil_per.comp = personagem.comp;
-	projetil_per.alt = personagem.alt/5;
+	projetil_per.alt = personagem.alt/8;
 	float vida_per = VIDA;
 	
 	// variaveis do inimigo
 	Bloco inimigo, projetil_ini;
 	inimigo.x = Width*0.85;
-	inimigo.y = Height*0.7;
+	inimigo.y = Height*0.65;
 	inimigo.comp = Width*0.1;
-	inimigo.alt = Height*0.2;
+	inimigo.alt = Height*0.25;
 	projetil_ini.x = inimigo.x-inimigo.comp;
 	projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 	projetil_ini.comp = inimigo.comp;
-	projetil_ini.alt = inimigo.alt/5;
+	projetil_ini.alt = inimigo.alt/7;
 	float vida_ini = VIDA;
 	
 	Bloco blocos[QUANT_BLOCOS];
@@ -134,6 +138,10 @@ int main(int argc, char* args[]){
 		blocos[i].alt = Height*0.2;
 	}
 	
+	float x_ryu = RYU_X;
+	float y_ryu = RYU_Y*2;
+	float x_ken = KEN_X;
+	float y_ken = KEN_Y*2;
 	
 	// loop do jogo
 	while(executando && vida_per>0 && vida_ini>0){
@@ -153,9 +161,13 @@ int main(int argc, char* args[]){
 				// keybinds do personagem
 				if(eventos.key.keysym.sym == SDLK_a){
 					esq_per = true;
+					x_ryu = RYU_X*5;
+					y_ryu = RYU_Y*2;
 				}
 				else if(eventos.key.keysym.sym == SDLK_d){
 					dir_per = true;
+					x_ryu = RYU_X*2;
+					y_ryu = RYU_Y*2;
 				}
 				else if(eventos.key.keysym.sym == SDLK_w){
 					cima_per = true;
@@ -167,9 +179,13 @@ int main(int argc, char* args[]){
 				// keybinds do inimigo
 				if(eventos.key.keysym.sym == SDLK_LEFT){
 					esq_ini = true;
+					x_ken = KEN_X;
+					y_ken = KEN_Y*3;
 				}
 				else if(eventos.key.keysym.sym == SDLK_RIGHT){
 					dir_ini = true;
+					x_ken = KEN_X*4;
+					y_ken = KEN_Y*3;
 				}
 				else if(eventos.key.keysym.sym == SDLK_UP){
 					cima_ini = true;
@@ -182,9 +198,13 @@ int main(int argc, char* args[]){
 				// keybinds do personagem
 				if(eventos.key.keysym.sym == SDLK_a){
 					esq_per = false;
+					x_ryu = RYU_X;
+					y_ryu = RYU_Y*2;
 				}
 				else if(eventos.key.keysym.sym == SDLK_d){
 					dir_per = false;
+					x_ryu = RYU_X;
+					y_ryu = RYU_Y*2;
 				}
 				else if(eventos.key.keysym.sym == SDLK_w){
 					cima_per = false;
@@ -193,9 +213,13 @@ int main(int argc, char* args[]){
 				// keybinds do inimigo
 				if(eventos.key.keysym.sym == SDLK_LEFT){
 					esq_ini = false;
+					x_ken = KEN_X;
+					y_ken = KEN_Y*2;
 				}
 				else if(eventos.key.keysym.sym == SDLK_RIGHT){
 					dir_ini = false;
+					x_ken = KEN_X;
+					y_ken = KEN_Y*2;
 				}
 				else if(eventos.key.keysym.sym == SDLK_UP){
 					cima_ini = false;
@@ -211,12 +235,24 @@ int main(int argc, char* args[]){
 			personagem.x -= 8;
 			if(atq_per == false){
 				projetil_per.x = personagem.x+personagem.comp;	
+			}
+			if(x_ryu <= RYU_X*2)
+				x_ryu = RYU_X*5;
+			else{
+				x_ryu -= RYU_X;
+				SDL_Delay(50);
 			}	
 		}
 		else if(dir_per == true){
 			personagem.x += 8;
 			if(atq_per == false){
 				projetil_per.x = personagem.x+personagem.comp;	
+			}
+			if(x_ryu >= RYU_X*5)
+				x_ryu = RYU_X;
+			else{
+				x_ryu += RYU_X;
+				SDL_Delay(50);
 			}
 		}
 		else if(cima_per == true){
@@ -244,11 +280,25 @@ int main(int argc, char* args[]){
 			if(atq_ini == false){
 				projetil_ini.x = inimigo.x-inimigo.comp;
 			}
+			if(x_ken >= KEN_X*4)
+				x_ken = KEN_X;
+			else{
+				x_ken += KEN_X;
+				if(esq_per == false && dir_per == false)
+					SDL_Delay(50);
+			}
 		}
 		else if(dir_ini == true){
 			inimigo.x += 8;
 			if(atq_ini == false){
 				projetil_ini.x = inimigo.x-inimigo.comp;
+			}
+			if(x_ken <= KEN_X)
+				x_ken = KEN_X*4;
+			else{
+				x_ken -= KEN_X;
+				if(esq_per == false && dir_per == false)
+					SDL_Delay(50);
 			}
 		}
 		else if(cima_ini == true){
@@ -335,20 +385,17 @@ int main(int argc, char* args[]){
 		// --- DESENHA PERSONAGEM ---
 		glColor3f(1, 1, 1);
 		glEnable(GL_TEXTURE_2D);
-		if(atq_per == false)
-			glBindTexture(GL_TEXTURE_2D,ryu_1);
-		if(atq_per == true)
-			glBindTexture(GL_TEXTURE_2D,ryu_2);
-		
+		glBindTexture(GL_TEXTURE_2D,ryu_1);
+
 		glTranslatef(personagem.x,personagem.y,0);
 		glBegin(GL_QUADS);
-		glTexCoord2d(0,0);
+		glTexCoord2d(x_ryu-RYU_X,y_ryu-RYU_Y);
 		glVertex2f(0, 0);
-		glTexCoord2d(1,0);
+		glTexCoord2d(x_ryu,y_ryu-RYU_Y);
 		glVertex2f(personagem.comp, 0);
-		glTexCoord2d(1,1);
+		glTexCoord2d(x_ryu,y_ryu);
 		glVertex2f(personagem.comp, personagem.alt);
-		glTexCoord2d(0,1);
+		glTexCoord2d(x_ryu-RYU_X,y_ryu);
 		glVertex2f(0, personagem.alt);
 		glEnd();
 		
@@ -360,20 +407,17 @@ int main(int argc, char* args[]){
 		// --- DESENHA INIMIGO ---
 		glColor3f(1, 1, 1);
 		glEnable(GL_TEXTURE_2D);
-		if(atq_ini == false)
-			glBindTexture(GL_TEXTURE_2D,ken_1);
-		if(atq_ini == true)
-			glBindTexture(GL_TEXTURE_2D,ken_2);
+		glBindTexture(GL_TEXTURE_2D,ken_1);
 		
 		glTranslatef(inimigo.x,inimigo.y,0);
 		glBegin(GL_QUADS);
-		glTexCoord2d(0,0);
+		glTexCoord2d(x_ken,y_ken);
 		glVertex2f(0, 0);
-		glTexCoord2d(1,0);
+		glTexCoord2d(x_ken-KEN_X,y_ken);
 		glVertex2f(inimigo.comp, 0);
-		glTexCoord2d(1,1);
+		glTexCoord2d(x_ken-KEN_X,y_ken+KEN_Y);
 		glVertex2f(inimigo.comp, inimigo.alt);
-		glTexCoord2d(0,1);
+		glTexCoord2d(x_ken,y_ken+KEN_Y);
 		glVertex2f(0, inimigo.alt);
 		glEnd();
 		
