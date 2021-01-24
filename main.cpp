@@ -9,7 +9,7 @@
 #define Width 900
 #define Height 600
 #define QUANT_BLOCOS 10
-#define VEL 200
+#define VIDA 200
 
 
 struct Bloco{
@@ -111,7 +111,7 @@ int main(int argc, char* args[]){
 	projetil_per.y = (personagem.y+(personagem.alt)/2);
 	projetil_per.comp = personagem.comp;
 	projetil_per.alt = personagem.alt/5;
-	float vida_per = 100;
+	float vida_per = VIDA;
 	
 	// variaveis do inimigo
 	Bloco inimigo, projetil_ini;
@@ -123,7 +123,7 @@ int main(int argc, char* args[]){
 	projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 	projetil_ini.comp = inimigo.comp;
 	projetil_ini.alt = inimigo.alt/5;
-	float vida_ini = 100;
+	float vida_ini = VIDA;
 	
 	Bloco blocos[QUANT_BLOCOS];
 	
@@ -300,7 +300,7 @@ int main(int argc, char* args[]){
 		
 		// --- DESENHA CENARIO ---
 		glBegin(GL_QUADS);
-		glColor3f(0,1,0);
+		glColor3f(0,0,1);
 		for(int i = 0; i < QUANT_BLOCOS; i++){
 			glVertex2f(blocos[i].x, blocos[i].y);
 			glVertex2f(blocos[i].x + blocos[i].comp, blocos[i].y);
@@ -308,6 +308,28 @@ int main(int argc, char* args[]){
 			glVertex2f(blocos[i].x, blocos[i].y + blocos[i].alt);
 		}
 		glEnd();
+		
+		// BARRA DE VIDA DO PERSONAGEM
+		glTranslatef(Width*0.01,Height*0.05,0);
+		glColor3f(0,1,0);
+		glBegin(GL_QUADS);
+		glVertex2f(0, 0);
+		glVertex2f(vida_per, 0);
+		glVertex2f(vida_per, Height*0.05);
+		glVertex2f(0, Height*0.05);
+		glEnd();
+		glTranslatef(-Width*0.01,-Height*0.05,0);
+		
+		// BARRA DE VIDA DO INIMIGO
+		glTranslatef(Width*0.99,Height*0.05,0);
+		glColor3f(0,1,0);
+		glBegin(GL_QUADS);
+		glVertex2f(0, 0);
+		glVertex2f(-vida_ini, 0);
+		glVertex2f(-vida_ini, Height*0.05);
+		glVertex2f(0, Height*0.05);
+		glEnd();
+		glTranslatef(-Width*0.99,-Height*0.05,0);
 		// --- DESENHA CENARIO ---
 		
 		// --- DESENHA PERSONAGEM ---
@@ -381,7 +403,7 @@ int main(int argc, char* args[]){
 			glDisable(GL_TEXTURE_2D);
 			
 			if(colisao(projetil_per, inimigo) == false){
-				projetil_per.x += 8;
+				projetil_per.x += 12;
 				// evitar que o projetil saia da tela
 				if(projetil_per.x>Width-projetil_per.comp || projetil_per.x<0){
 					projetil_per.x = personagem.x+personagem.comp;
@@ -421,7 +443,7 @@ int main(int argc, char* args[]){
 			glDisable(GL_TEXTURE_2D);
 			
 			if(colisao(personagem, projetil_ini) == false){
-				projetil_ini.x -= 8;
+				projetil_ini.x -= 12;
 				// evitar que o projetil saia da tela
 				if(projetil_ini.x>Width-projetil_ini.comp || projetil_ini.x<0){
 					projetil_ini.x = inimigo.x-inimigo.comp;
