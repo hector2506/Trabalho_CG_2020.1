@@ -69,7 +69,7 @@ int main(int argc, char* args[]){
 	SDL_SetVideoMode(Width, Height, 32, SDL_OPENGL);
 	
 	// cor da janela
-	glClearColor(0,0,0,1);
+	glClearColor(1,1,1,1);
 	
 	// area exibida
 	glViewport(0,0,Width,Height);
@@ -92,10 +92,12 @@ int main(int argc, char* args[]){
 	bool executando = true;
 	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false;
 	bool atq_per = false, atq_ini = false;
-	unsigned int projetil_per_textura = 0;
-	projetil_per_textura = loadTexture("Hadouken.png");
-	unsigned int projetil_ini_textura = 0;
-	projetil_ini_textura = loadTexture("Hadouken-2.png");
+	unsigned int projetil_per_textura = loadTexture("Hadouken.png");
+	unsigned int projetil_ini_textura = loadTexture("Hadouken-2.png");
+	unsigned int ryu_1 = loadTexture("Ryu-1.png");
+	unsigned int ryu_2 = loadTexture("Ryu-2.png");
+	unsigned int ken_1 = loadTexture("Ken-1.png");
+	unsigned int ken_2 = loadTexture("Ken-2.png");
 	
 	SDL_Event eventos;
 	
@@ -104,11 +106,11 @@ int main(int argc, char* args[]){
 	personagem.x = Width*0.05;
 	personagem.y = Height*0.7;
 	personagem.comp = Width*0.1;
-	personagem.alt = Height*0.15;
+	personagem.alt = Height*0.2;
 	projetil_per.x = personagem.x+personagem.comp;
 	projetil_per.y = (personagem.y+(personagem.alt)/2);
 	projetil_per.comp = personagem.comp;
-	projetil_per.alt = personagem.alt/4;
+	projetil_per.alt = personagem.alt/5;
 	float vida_per = 100;
 	
 	// variaveis do inimigo
@@ -116,11 +118,11 @@ int main(int argc, char* args[]){
 	inimigo.x = Width*0.85;
 	inimigo.y = Height*0.7;
 	inimigo.comp = Width*0.1;
-	inimigo.alt = Height*0.15;
+	inimigo.alt = Height*0.2;
 	projetil_ini.x = inimigo.x-inimigo.comp;
 	projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 	projetil_ini.comp = inimigo.comp;
-	projetil_ini.alt = inimigo.alt/4;
+	projetil_ini.alt = inimigo.alt/5;
 	float vida_ini = 100;
 	
 	Bloco blocos[QUANT_BLOCOS];
@@ -134,7 +136,7 @@ int main(int argc, char* args[]){
 	
 	
 	// loop do jogo
-	while(executando && vida_ini>0){
+	while(executando && vida_per>0 && vida_ini>0){
 		// --- EVENTOS DO SDL - KEYBINDS E ETC ---
 		while(SDL_PollEvent(&eventos)){
 			// fecha com o X da janela
@@ -296,35 +298,9 @@ int main(int argc, char* args[]){
 		// dimensoes da matriz
 		glOrtho(0, Width, Height, 0, -1, 1);
 		
-		// --- DESENHA PERSONAGEM ---
-		glColor3f(0, 0, 1);
-		glTranslatef(personagem.x,personagem.y,0);
-		glBegin(GL_QUADS);
-		glVertex2f(0, 0);
-		glVertex2f(personagem.comp, 0);
-		glVertex2f(personagem.comp, personagem.alt);
-		glVertex2f(0, personagem.alt);
-		glEnd();
-		glTranslatef(-personagem.x,-personagem.y,0);
-		
-		// --- DESENHA PERSONAGEM ---
-		
-		
-		// --- DESENHA INIMIGO ---
-		glTranslatef(inimigo.x,inimigo.y,0);
-		glBegin(GL_QUADS);
-		glColor3f(1, 0, 0);
-		glVertex2f(0, 0);
-		glVertex2f(inimigo.comp, 0);
-		glVertex2f(inimigo.comp, inimigo.alt);
-		glVertex2f(0, inimigo.alt);
-		glEnd();
-		glTranslatef(-inimigo.x,-inimigo.y,0);
-		// --- DESENHA INIMIGO ---
-		
 		// --- DESENHA CENARIO ---
 		glBegin(GL_QUADS);
-		glColor3f(1,1,1);
+		glColor3f(0,1,0);
 		for(int i = 0; i < QUANT_BLOCOS; i++){
 			glVertex2f(blocos[i].x, blocos[i].y);
 			glVertex2f(blocos[i].x + blocos[i].comp, blocos[i].y);
@@ -333,6 +309,55 @@ int main(int argc, char* args[]){
 		}
 		glEnd();
 		// --- DESENHA CENARIO ---
+		
+		// --- DESENHA PERSONAGEM ---
+		glColor3f(1, 1, 1);
+		glEnable(GL_TEXTURE_2D);
+		if(atq_per == false)
+			glBindTexture(GL_TEXTURE_2D,ryu_1);
+		if(atq_per == true)
+			glBindTexture(GL_TEXTURE_2D,ryu_2);
+		
+		glTranslatef(personagem.x,personagem.y,0);
+		glBegin(GL_QUADS);
+		glTexCoord2d(0,0);
+		glVertex2f(0, 0);
+		glTexCoord2d(1,0);
+		glVertex2f(personagem.comp, 0);
+		glTexCoord2d(1,1);
+		glVertex2f(personagem.comp, personagem.alt);
+		glTexCoord2d(0,1);
+		glVertex2f(0, personagem.alt);
+		glEnd();
+		
+		glTranslatef(-personagem.x,-personagem.y,0);
+		glDisable(GL_TEXTURE_2D);
+		// --- DESENHA PERSONAGEM ---
+		
+		
+		// --- DESENHA INIMIGO ---
+		glColor3f(1, 1, 1);
+		glEnable(GL_TEXTURE_2D);
+		if(atq_ini == false)
+			glBindTexture(GL_TEXTURE_2D,ken_1);
+		if(atq_ini == true)
+			glBindTexture(GL_TEXTURE_2D,ken_2);
+		
+		glTranslatef(inimigo.x,inimigo.y,0);
+		glBegin(GL_QUADS);
+		glTexCoord2d(0,0);
+		glVertex2f(0, 0);
+		glTexCoord2d(1,0);
+		glVertex2f(inimigo.comp, 0);
+		glTexCoord2d(1,1);
+		glVertex2f(inimigo.comp, inimigo.alt);
+		glTexCoord2d(0,1);
+		glVertex2f(0, inimigo.alt);
+		glEnd();
+		
+		glTranslatef(-inimigo.x,-inimigo.y,0);
+		glDisable(GL_TEXTURE_2D);
+		// --- DESENHA INIMIGO ---
 		
 		// --- CRIA projetil do personagem ---
 		if(atq_per == true){
@@ -370,6 +395,7 @@ int main(int argc, char* args[]){
 				atq_per = false;
 				vida_ini -= 25;
 			}
+			
 		}
 		// --- CRIA projetil do personagem ---
 		
