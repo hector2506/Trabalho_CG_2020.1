@@ -1,3 +1,16 @@
+// *********************************************************************
+// Alunos: HECTOR BATISTA RIBEIRO e IAN LUCCAS ARAUJO
+// Controles do Personagem 1:
+// A - move para a esquerda.
+// D - move para a direita.
+// W - pula.
+// Espaço - ataca.
+// Controles do Personagem 2:
+// Seta da esquerda - move para a esquerda.
+// Seta da direita - move para a direita.
+// Seta de cima - pula.
+// Backspace - ataca.
+// *********************************************************************
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 #include <stdio.h>
@@ -6,14 +19,16 @@
 #include <string>
 
 
-#define Width 900
-#define Height 600
-#define QUANT_BLOCOS 10
-#define VIDA 200
-#define RYU_X 0.055
-#define RYU_Y 0.17
-#define KEN_X 0.14
-#define KEN_Y 0.1
+#define Width 900 // Largura da janela
+#define Height 600 // Altura da janela
+#define QUANT_BLOCOS 10 // Quantidade de blocos de cenario
+#define VIDA 200 // Quantidade de vida dos personagens
+#define DANO_RYU 50 // Valor do dano do ataque do Ryu
+#define DANO_KEN 50 // Valor do dano do ataque do Ken
+#define RYU_X 0.055 // Valor para controlar na horizontal o sprite dentro do sprite sheet do Ryu
+#define RYU_Y 0.17 // Valor para controlar na vertical o sprite dentro do sprite sheet do Ryu
+#define KEN_X 0.14 // Valor para controlar na horizontal o sprite dentro do sprite sheet do Ken
+#define KEN_Y 0.1 // Valor para controlar na vertical o sprite dentro do sprite sheet do Ken
 
 
 struct Bloco{
@@ -39,8 +54,7 @@ GLuint loadTexture(const std::string&fileName){
 	return object;
 }
 
-// A - personagem
-// B - inimigo
+// Funcao para detectar colisao
 bool colisao(Bloco A, Bloco B){
 	if(A.y+A.alt < B.y)
 		return false;
@@ -54,6 +68,7 @@ bool colisao(Bloco A, Bloco B){
 	return true;
 }
 
+// Funcao para desenhar um personagem
 void desenhaPersonagem(Bloco A, unsigned int textura, float tex_X1, float tex_X2, float tex_Y1, float tex_Y2){
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textura);
@@ -74,6 +89,7 @@ void desenhaPersonagem(Bloco A, unsigned int textura, float tex_X1, float tex_X2
 	glDisable(GL_TEXTURE_2D);
 }
 
+// Funcao para desenhar o projetil do ataque
 void desenhaProjetil(Bloco A, unsigned int textura, float tex_X1, float tex_X2, float tex_Y1, float tex_Y2){
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,textura);
@@ -94,6 +110,7 @@ void desenhaProjetil(Bloco A, unsigned int textura, float tex_X1, float tex_X2, 
 	glDisable(GL_TEXTURE_2D);
 }
 
+// Funcao para desenhar o cenario
 void desenhaCenario(Bloco blocos[QUANT_BLOCOS], float vida_per, float vida_ini){
 	// BLOCOS DO CENARIO
 	glBegin(GL_QUADS);
@@ -130,9 +147,8 @@ void desenhaCenario(Bloco blocos[QUANT_BLOCOS], float vida_per, float vida_ini){
 }
 
 int main(int argc, char* args[]){
+	// Inicializacao do SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
-	
-	// memoria
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -141,33 +157,33 @@ int main(int argc, char* args[]){
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	
-	// nome da janela
+	// Nome da janela
 	SDL_WM_SetCaption("Square Fighter", NULL);
 	
-	// tamanho da janela
+	// Tamanho da janela
 	SDL_SetVideoMode(Width, Height, 32, SDL_OPENGL);
 	
-	// cor da janela
+	// Cor da janela
 	glClearColor(0,0,0,1);
 	
-	// area exibida
+	// Area exibida
 	glViewport(0,0,Width,Height);
 	
-	// sombreamento
+	// Sombreamento
 	glShadeModel(GL_SMOOTH);
 	
-	// usar 2D
+	// Usar Projecao 2D
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-	// desabilitar 3D
+	// Desabilitar o 3D
 	glDisable(GL_DEPTH_TEST);
 	
-	// para uso da imagem
+	// Para uso da imagem
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	// variaveis de auxilio
+	// Variaveis de auxilio
 	bool executando = true;
 	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false;
 	bool atq_per = false, atq_ini = false;
@@ -176,12 +192,13 @@ int main(int argc, char* args[]){
 	unsigned int ryu_1 = loadTexture("Ryu.png");
 	unsigned int ken_1 = loadTexture("Ken.png");
 	
+	// Variavel para controlar os eventos da janela
 	SDL_Event eventos;
 	
-	// variaveis do personagem
+	// Variaveis do personagem
 	Bloco personagem, projetil_per;
 	personagem.x = Width*0.05;
-	personagem.y = Height*0.6;
+	personagem.y = Height*0.7;
 	personagem.comp = Width*0.1;
 	personagem.alt = Height*0.3;
 	projetil_per.x = personagem.x+personagem.comp;
@@ -190,10 +207,10 @@ int main(int argc, char* args[]){
 	projetil_per.alt = personagem.alt/8;
 	float vida_per = VIDA;
 	
-	// variaveis do inimigo
+	// Variaveis do inimigo
 	Bloco inimigo, projetil_ini;
 	inimigo.x = Width*0.85;
-	inimigo.y = Height*0.65;
+	inimigo.y = Height*0.75;
 	inimigo.comp = Width*0.1;
 	inimigo.alt = Height*0.25;
 	projetil_ini.x = inimigo.x-inimigo.comp;
@@ -202,108 +219,125 @@ int main(int argc, char* args[]){
 	projetil_ini.alt = inimigo.alt/7;
 	float vida_ini = VIDA;
 	
+	// Array do cenario
 	Bloco blocos[QUANT_BLOCOS];
-	
-	for(int i = 0, x = 0, y = Height*0.9; i < QUANT_BLOCOS; i++, x += Width/QUANT_BLOCOS){
+	for(int i = 0, x = 0, y = Height; i < QUANT_BLOCOS; i++, x += Width/QUANT_BLOCOS){
 		blocos[i].x = x;
 		blocos[i].y = y;
 		blocos[i].comp = Width*0.2;
 		blocos[i].alt = Height*0.2;
 	}
 	
+	// Variaveis para controlar a exibicao das texturas
 	float x_ryu = RYU_X;
 	float y_ryu = RYU_Y*2;
 	float x_ken = KEN_X;
 	float y_ken = KEN_Y*2;
 	
-	// loop do jogo
+	// Loop do jogo
 	while(executando && vida_per>0 && vida_ini>0){
-		// --- EVENTOS DO SDL - KEYBINDS E ETC ---
+		// --- EVENTOS - KEYBINDS E ETC ---
 		while(SDL_PollEvent(&eventos)){
-			// fecha com o X da janela
+			// Fecha com o X da janela
 			if(eventos.type == SDL_QUIT){
 				executando = false;
 			}
 			
-			// fecha com esc
+			// Fecha com esc
 			if(eventos.type == SDL_KEYUP && eventos.key.keysym.sym == SDLK_ESCAPE){
 				executando = false;
 			}
 			
+			// Caso uma tecla seja pressionada
 			if(eventos.type == SDL_KEYDOWN){
-				// keybinds do personagem
+				// --- KEYBINDS DO RYU ---
+				// Caso o a seja pressionado
 				if(eventos.key.keysym.sym == SDLK_a){
 					esq_per = true;
 					x_ryu = RYU_X*5;
 					y_ryu = RYU_Y*2;
 				}
+				// Caso o d seja pressionado
 				else if(eventos.key.keysym.sym == SDLK_d){
 					dir_per = true;
 					x_ryu = RYU_X*2;
 					y_ryu = RYU_Y*2;
 				}
+				// Caso o w seja pressionado
 				else if(eventos.key.keysym.sym == SDLK_w){
 					cima_per = true;
 				}
+				// Caso o espaco seja pressionado
 				else if(eventos.key.keysym.sym == SDLK_SPACE){
 					atq_per = true;
 				}
 				
-				// keybinds do inimigo
+				// --- KEYBINDS DO KEN ---
+				// Caso a seta da esquerda seja pressionada
 				if(eventos.key.keysym.sym == SDLK_LEFT){
 					esq_ini = true;
 					x_ken = KEN_X;
 					y_ken = KEN_Y*3;
 				}
+				// Caso a seta da direita seja pressionada
 				else if(eventos.key.keysym.sym == SDLK_RIGHT){
 					dir_ini = true;
 					x_ken = KEN_X*4;
 					y_ken = KEN_Y*3;
 				}
+				// Caso a seta de cima seja pressionada
 				else if(eventos.key.keysym.sym == SDLK_UP){
 					cima_ini = true;
 				}
+				// Caso o backspace seja pressionado
 				else if(eventos.key.keysym.sym == SDLK_BACKSPACE){
 					atq_ini = true;
 				}
 			}
+			// Caso uma tecla seja solta
 			else if(eventos.type == SDL_KEYUP){
-				// keybinds do personagem
+				// --- KEYBINDS DO RYU ---
+				// Caso o a seja solto
 				if(eventos.key.keysym.sym == SDLK_a){
 					esq_per = false;
 					x_ryu = RYU_X;
 					y_ryu = RYU_Y*2;
 				}
+				// Caso o d seja solto
 				else if(eventos.key.keysym.sym == SDLK_d){
 					dir_per = false;
 					x_ryu = RYU_X;
 					y_ryu = RYU_Y*2;
 				}
+				// Caso o w seja solto
 				else if(eventos.key.keysym.sym == SDLK_w){
 					cima_per = false;
 				}
 				
-				// keybinds do inimigo
+				// --- KEYBINDS DO KEN ---
+				// Caso a seta da esquerda seja solta
 				if(eventos.key.keysym.sym == SDLK_LEFT){
 					esq_ini = false;
 					x_ken = KEN_X;
 					y_ken = KEN_Y*2;
 				}
+				// Caso a seta da direita seja solta
 				else if(eventos.key.keysym.sym == SDLK_RIGHT){
 					dir_ini = false;
 					x_ken = KEN_X;
 					y_ken = KEN_Y*2;
 				}
+				// Caso a seta de cima seja solta
 				else if(eventos.key.keysym.sym == SDLK_UP){
 					cima_ini = false;
 				}
 			}
 		}
-		// --- EVENTOS DO SDL - KEYBINDS E ETC ---
+		// --- EVENTOS - KEYBINDS E ETC ---
 		
-		// LOGICA
+		// --- LOGICA ---
 		
-		// --- MOVIMENTO DO PERSONAGEM ---
+		// --- MOVIMENTO DO Ryu ---
 		if(esq_per == true){
 			personagem.x -= 8;
 			if(atq_per == false){
@@ -329,25 +363,25 @@ int main(int argc, char* args[]){
 			}
 		}
 		else if(cima_per == true){
-			if(personagem.y > Height*0.55){
+			if(personagem.y > Height*0.5){
 				personagem.y -= 8;
 				if(atq_per == false){
 					projetil_per.y = (personagem.y+(personagem.alt)/2);	
 				}
 			}
-			else if(personagem.y <= Height*0.55)
+			else if(personagem.y <= Height*0.5)
 				cima_per = false;
 		}
-		// evitar que o personagem saia da tela
+		// Evitar que o Ryu saia da tela
 		if(personagem.x>Width-personagem.comp){
 			personagem.x = Width-personagem.comp;
 		}
 		else if(personagem.x<0){
 			personagem.x = 0;
 		}
-		// --- MOVIMENTO DO PERSONAGEM ---
+		// --- MOVIMENTO DO Ryu ---
 		
-		// --- MOVIMENTO DO INIMIGO ---
+		// --- MOVIMENTO DO Ken ---
 		if(esq_ini == true){
 			inimigo.x -= 8;
 			if(atq_ini == false){
@@ -384,14 +418,14 @@ int main(int argc, char* args[]){
 			else if(inimigo.y <= Height*0.55)
 				cima_ini = false;
 		}
-		// evitar que o inimigo saia da tela
+		// Evitar que o Ken saia da tela
 		if(inimigo.x>Width-inimigo.comp){
 			inimigo.x = Width-inimigo.comp;
 		}
 		else if(inimigo.x<0){
 			inimigo.x = 0;
 		}
-		// --- MOVIMENTO DO INIMIGO ---
+		// --- MOVIMENTO DO Ken ---
 		
 		// COLISAO
 		if (colisao(personagem, inimigo) == true){
@@ -411,32 +445,33 @@ int main(int argc, char* args[]){
 					projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 			}
 		}
+		// --- LOGICA ---
 		
-		// RENDERIZACAO
+		// --- RENDERIZACAO ---
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		// inicia a matriz de desenho
+		// Inicia a matriz de desenho
 		glPushMatrix();
 		
-		// dimensoes da matriz
+		// Dimensoes da matriz
 		glOrtho(0, Width, Height, 0, -1, 1);
 		
-		// --- DESENHA CENARIO ---
+		// --- DESENHA O CENARIO ---
 		desenhaCenario(blocos, vida_per, vida_ini);
-		// --- DESENHA CENARIO ---
+		// --- DESENHA O CENARIO ---
 		
-		// --- DESENHA PERSONAGEM ---
+		// --- DESENHA O RYU ---
 		glColor3f(1, 1, 1);
 		desenhaPersonagem(personagem, ryu_1, x_ryu-RYU_X, x_ryu, y_ryu-RYU_Y, y_ryu);
-		// --- DESENHA PERSONAGEM ---
+		// --- DESENHA O RYU ---
 		
 		
-		// --- DESENHA INIMIGO ---
+		// --- DESENHA O KEN ---
 		glColor3f(1, 1, 1);
 		desenhaPersonagem(inimigo, ken_1, x_ken, x_ken-KEN_X, y_ken, y_ken+KEN_Y);	
-		// --- DESENHA INIMIGO ---
+		// --- DESENHA O KEN ---
 		
-		// --- CRIA projetil do personagem ---
+		// --- CRIA O HADOUKEN DO RYU ---
 		if(atq_per == true){
 			glColor3f(1, 1, 1);
 			desenhaProjetil(projetil_per, projetil_per_textura, 0, 1, 0, 1);
@@ -454,13 +489,13 @@ int main(int argc, char* args[]){
 				projetil_per.x = personagem.x+personagem.comp;
 				projetil_per.y = (personagem.y+(personagem.alt)/2);
 				atq_per = false;
-				vida_ini -= 25;
+				vida_ini -= DANO_RYU;
 			}
 			
 		}
-		// --- CRIA projetil do personagem ---
+		// --- CRIA O HADOUKEN DO RYU ---
 		
-		// --- CRIA projetil do inimigo ---
+		// --- CRIA O HADOUKEN DO KEN ---
 		if(atq_ini == true){
 			glColor3f(1, 1, 1);
 			desenhaProjetil(projetil_ini, projetil_ini_textura, 0, 1, 0, 1);
@@ -478,16 +513,17 @@ int main(int argc, char* args[]){
 				projetil_ini.x = inimigo.x-inimigo.comp;
 				projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 				atq_ini = false;
-				vida_per -= 25;
+				vida_per -= DANO_KEN;
 			}
 		}
-		// --- CRIA projetil do inimigo ---
+		// --- CRIA O HADOUKEN DO KEN ---
 		
-		// fecha matrix
+		// Fecha matrix
 		glPopMatrix();
 		
-		// animacao
+		// Troca os buffers
 		SDL_GL_SwapBuffers();
+		// --- RENDERIZACAO ---
 	}
 	
 	SDL_Quit();
