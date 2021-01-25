@@ -54,6 +54,81 @@ bool colisao(Bloco A, Bloco B){
 	return true;
 }
 
+void desenhaPersonagem(Bloco A, unsigned int textura, float tex_X1, float tex_X2, float tex_Y1, float tex_Y2){
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,textura);
+
+	glTranslatef(A.x,A.y,0);
+	glBegin(GL_QUADS);
+	glTexCoord2d(tex_X1,tex_Y1);
+	glVertex2f(0, 0);
+	glTexCoord2d(tex_X2,tex_Y1);
+	glVertex2f(A.comp, 0);
+	glTexCoord2d(tex_X2,tex_Y2);
+	glVertex2f(A.comp, A.alt);
+	glTexCoord2d(tex_X1,tex_Y2);
+	glVertex2f(0, A.alt);
+	glEnd();
+	
+	glTranslatef(-A.x,-A.y,0);
+	glDisable(GL_TEXTURE_2D);
+}
+
+void desenhaProjetil(Bloco A, unsigned int textura, float tex_X1, float tex_X2, float tex_Y1, float tex_Y2){
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,textura);
+	
+	glTranslatef(A.x,A.y,0);
+	glBegin(GL_QUADS);
+	glTexCoord2d(tex_X1,tex_Y1);
+	glVertex2f(0, -A.alt);
+	glTexCoord2d(tex_X2,tex_Y1);
+	glVertex2f(A.comp, -A.alt);
+	glTexCoord2d(tex_X2,tex_Y2);
+	glVertex2f(A.comp, A.alt);
+	glTexCoord2d(tex_X1,tex_Y2);
+	glVertex2f(0, A.alt);
+	
+	glEnd();
+	glTranslatef(-A.x,-A.y,0);
+	glDisable(GL_TEXTURE_2D);
+}
+
+void desenhaCenario(Bloco blocos[QUANT_BLOCOS], float vida_per, float vida_ini){
+	// BLOCOS DO CENARIO
+	glBegin(GL_QUADS);
+	glColor3f(0,0,1);
+	for(int i = 0; i < QUANT_BLOCOS; i++){
+		glVertex2f(blocos[i].x, blocos[i].y);
+		glVertex2f(blocos[i].x + blocos[i].comp, blocos[i].y);
+		glVertex2f(blocos[i].x + blocos[i].comp, blocos[i].y + blocos[i].alt);
+		glVertex2f(blocos[i].x, blocos[i].y + blocos[i].alt);
+	}
+	glEnd();
+	
+	// BARRA DE VIDA DO PERSONAGEM
+	glTranslatef(Width*0.01,Height*0.05,0);
+	glColor3f(0,1,0);
+	glBegin(GL_QUADS);
+	glVertex2f(0, 0);
+	glVertex2f(vida_per, 0);
+	glVertex2f(vida_per, Height*0.05);
+	glVertex2f(0, Height*0.05);
+	glEnd();
+	glTranslatef(-Width*0.01,-Height*0.05,0);
+	
+	// BARRA DE VIDA DO INIMIGO
+	glTranslatef(Width*0.99,Height*0.05,0);
+	glColor3f(0,1,0);
+	glBegin(GL_QUADS);
+	glVertex2f(0, 0);
+	glVertex2f(-vida_ini, 0);
+	glVertex2f(-vida_ini, Height*0.05);
+	glVertex2f(0, Height*0.05);
+	glEnd();
+	glTranslatef(-Width*0.99,-Height*0.05,0);
+}
+
 int main(int argc, char* args[]){
 	SDL_Init(SDL_INIT_EVERYTHING);
 	
@@ -99,9 +174,7 @@ int main(int argc, char* args[]){
 	unsigned int projetil_per_textura = loadTexture("Hadouken.png");
 	unsigned int projetil_ini_textura = loadTexture("Hadouken-2.png");
 	unsigned int ryu_1 = loadTexture("Ryu.png");
-	//unsigned int ryu_2 = loadTexture("Ryu-2.png");
 	unsigned int ken_1 = loadTexture("Ken.png");
-	//unsigned int ken_2 = loadTexture("Ken-2.png");
 	
 	SDL_Event eventos;
 	
@@ -349,102 +422,24 @@ int main(int argc, char* args[]){
 		glOrtho(0, Width, Height, 0, -1, 1);
 		
 		// --- DESENHA CENARIO ---
-		glBegin(GL_QUADS);
-		glColor3f(0,0,1);
-		for(int i = 0; i < QUANT_BLOCOS; i++){
-			glVertex2f(blocos[i].x, blocos[i].y);
-			glVertex2f(blocos[i].x + blocos[i].comp, blocos[i].y);
-			glVertex2f(blocos[i].x + blocos[i].comp, blocos[i].y + blocos[i].alt);
-			glVertex2f(blocos[i].x, blocos[i].y + blocos[i].alt);
-		}
-		glEnd();
-		
-		// BARRA DE VIDA DO PERSONAGEM
-		glTranslatef(Width*0.01,Height*0.05,0);
-		glColor3f(0,1,0);
-		glBegin(GL_QUADS);
-		glVertex2f(0, 0);
-		glVertex2f(vida_per, 0);
-		glVertex2f(vida_per, Height*0.05);
-		glVertex2f(0, Height*0.05);
-		glEnd();
-		glTranslatef(-Width*0.01,-Height*0.05,0);
-		
-		// BARRA DE VIDA DO INIMIGO
-		glTranslatef(Width*0.99,Height*0.05,0);
-		glColor3f(0,1,0);
-		glBegin(GL_QUADS);
-		glVertex2f(0, 0);
-		glVertex2f(-vida_ini, 0);
-		glVertex2f(-vida_ini, Height*0.05);
-		glVertex2f(0, Height*0.05);
-		glEnd();
-		glTranslatef(-Width*0.99,-Height*0.05,0);
+		desenhaCenario(blocos, vida_per, vida_ini);
 		// --- DESENHA CENARIO ---
 		
 		// --- DESENHA PERSONAGEM ---
 		glColor3f(1, 1, 1);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D,ryu_1);
-
-		glTranslatef(personagem.x,personagem.y,0);
-		glBegin(GL_QUADS);
-		glTexCoord2d(x_ryu-RYU_X,y_ryu-RYU_Y);
-		glVertex2f(0, 0);
-		glTexCoord2d(x_ryu,y_ryu-RYU_Y);
-		glVertex2f(personagem.comp, 0);
-		glTexCoord2d(x_ryu,y_ryu);
-		glVertex2f(personagem.comp, personagem.alt);
-		glTexCoord2d(x_ryu-RYU_X,y_ryu);
-		glVertex2f(0, personagem.alt);
-		glEnd();
-		
-		glTranslatef(-personagem.x,-personagem.y,0);
-		glDisable(GL_TEXTURE_2D);
+		desenhaPersonagem(personagem, ryu_1, x_ryu-RYU_X, x_ryu, y_ryu-RYU_Y, y_ryu);
 		// --- DESENHA PERSONAGEM ---
 		
 		
 		// --- DESENHA INIMIGO ---
 		glColor3f(1, 1, 1);
-		glEnable(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D,ken_1);
-		
-		glTranslatef(inimigo.x,inimigo.y,0);
-		glBegin(GL_QUADS);
-		glTexCoord2d(x_ken,y_ken);
-		glVertex2f(0, 0);
-		glTexCoord2d(x_ken-KEN_X,y_ken);
-		glVertex2f(inimigo.comp, 0);
-		glTexCoord2d(x_ken-KEN_X,y_ken+KEN_Y);
-		glVertex2f(inimigo.comp, inimigo.alt);
-		glTexCoord2d(x_ken,y_ken+KEN_Y);
-		glVertex2f(0, inimigo.alt);
-		glEnd();
-		
-		glTranslatef(-inimigo.x,-inimigo.y,0);
-		glDisable(GL_TEXTURE_2D);
+		desenhaPersonagem(inimigo, ken_1, x_ken, x_ken-KEN_X, y_ken, y_ken+KEN_Y);	
 		// --- DESENHA INIMIGO ---
 		
 		// --- CRIA projetil do personagem ---
 		if(atq_per == true){
 			glColor3f(1, 1, 1);
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D,projetil_per_textura);
-			
-			glTranslatef(projetil_per.x,projetil_per.y,0);
-			glBegin(GL_QUADS);
-			glTexCoord2d(0,0);
-			glVertex2f(0, -projetil_per.alt);
-			glTexCoord2d(1,0);
-			glVertex2f(projetil_per.comp, -projetil_per.alt);
-			glTexCoord2d(1,1);
-			glVertex2f(projetil_per.comp, projetil_per.alt);
-			glTexCoord2d(0,1);
-			glVertex2f(0, projetil_per.alt);
-			
-			glEnd();
-			glTranslatef(-projetil_per.x,-projetil_per.y,0);
-			glDisable(GL_TEXTURE_2D);
+			desenhaProjetil(projetil_per, projetil_per_textura, 0, 1, 0, 1);
 			
 			if(colisao(projetil_per, inimigo) == false){
 				projetil_per.x += 12;
@@ -468,23 +463,7 @@ int main(int argc, char* args[]){
 		// --- CRIA projetil do inimigo ---
 		if(atq_ini == true){
 			glColor3f(1, 1, 1);
-			glEnable(GL_TEXTURE_2D);
-			glBindTexture(GL_TEXTURE_2D,projetil_ini_textura);
-			
-			glTranslatef(projetil_ini.x,projetil_ini.y,0);
-			glBegin(GL_QUADS);
-			glTexCoord2d(0,0);
-			glVertex2f(0, -projetil_ini.alt);
-			glTexCoord2d(1,0);
-			glVertex2f(projetil_ini.comp, -projetil_ini.alt);
-			glTexCoord2d(1,1);
-			glVertex2f(projetil_ini.comp, projetil_ini.alt);
-			glTexCoord2d(0,1);
-			glVertex2f(0, projetil_ini.alt);
-			
-			glEnd();
-			glTranslatef(-projetil_ini.x,-projetil_ini.y,0);
-			glDisable(GL_TEXTURE_2D);
+			desenhaProjetil(projetil_ini, projetil_ini_textura, 0, 1, 0, 1);
 			
 			if(colisao(personagem, projetil_ini) == false){
 				projetil_ini.x -= 12;
