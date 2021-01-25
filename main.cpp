@@ -10,6 +10,9 @@
 // Seta da direita - move para a direita.
 // Seta de cima - pula.
 // Backspace - ataca.
+// Alterar a musica:
+// F1 - Música do Ryu - Nome: Street Fighter Alpha 2 Ryu Theme
+// F2 - Música do Ken - Nome: Street Fighter Alpha 2 Ken Theme
 // *********************************************************************
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
@@ -17,20 +20,22 @@
 #include <SDL/SDL_image.h>
 #include <stdlib.h>
 #include <string>
+#include <SDL/SDL_mixer.h>
 
 
 #define Width 900 // Largura da janela
 #define Height 600 // Altura da janela
 #define QUANT_BLOCOS 10 // Quantidade de blocos de cenario
-#define VIDA 200 // Quantidade de vida dos personagens
-#define DANO_RYU 50 // Valor do dano do ataque do Ryu
-#define DANO_KEN 50 // Valor do dano do ataque do Ken
+#define VIDA_RYU 100 // Quantidade de vida do Ryu
+#define VIDA_KEN 100 // Quantidade de vida do Ken
+#define DANO_RYU 20 // Valor do dano do ataque do Ryu
+#define DANO_KEN 20 // Valor do dano do ataque do Ken
 #define RYU_X 0.055 // Valor para controlar na horizontal o sprite dentro do sprite sheet do Ryu
 #define RYU_Y 0.17 // Valor para controlar na vertical o sprite dentro do sprite sheet do Ryu
 #define KEN_X 0.14 // Valor para controlar na horizontal o sprite dentro do sprite sheet do Ken
 #define KEN_Y 0.1 // Valor para controlar na vertical o sprite dentro do sprite sheet do Ken
 
-
+// Estrutura usada nos elementos do jogo
 struct Bloco{
 	float x;
 	float y;
@@ -123,24 +128,24 @@ void desenhaCenario(Bloco blocos[QUANT_BLOCOS], float vida_per, float vida_ini){
 	}
 	glEnd();
 	
-	// BARRA DE VIDA DO PERSONAGEM
+	// BARRA DE VIDA DO RYU
 	glTranslatef(Width*0.01,Height*0.05,0);
 	glColor3f(0,1,0);
 	glBegin(GL_QUADS);
 	glVertex2f(0, 0);
-	glVertex2f(vida_per, 0);
-	glVertex2f(vida_per, Height*0.05);
+	glVertex2f(vida_per*2, 0);
+	glVertex2f(vida_per*2, Height*0.05);
 	glVertex2f(0, Height*0.05);
 	glEnd();
 	glTranslatef(-Width*0.01,-Height*0.05,0);
 	
-	// BARRA DE VIDA DO INIMIGO
+	// BARRA DE VIDA DO KEN
 	glTranslatef(Width*0.99,Height*0.05,0);
 	glColor3f(0,1,0);
 	glBegin(GL_QUADS);
 	glVertex2f(0, 0);
-	glVertex2f(-vida_ini, 0);
-	glVertex2f(-vida_ini, Height*0.05);
+	glVertex2f(-vida_ini*2, 0);
+	glVertex2f(-vida_ini*2, Height*0.05);
 	glVertex2f(0, Height*0.05);
 	glEnd();
 	glTranslatef(-Width*0.99,-Height*0.05,0);
@@ -195,7 +200,7 @@ int main(int argc, char* args[]){
 	// Variavel para controlar os eventos da janela
 	SDL_Event eventos;
 	
-	// Variaveis do personagem
+	// Variaveis do Ryu
 	Bloco personagem, projetil_per;
 	personagem.x = Width*0.05;
 	personagem.y = Height*0.7;
@@ -205,9 +210,9 @@ int main(int argc, char* args[]){
 	projetil_per.y = (personagem.y+(personagem.alt)/2);
 	projetil_per.comp = personagem.comp;
 	projetil_per.alt = personagem.alt/8;
-	float vida_per = VIDA;
+	float vida_per = VIDA_RYU;
 	
-	// Variaveis do inimigo
+	// Variaveis do Ken
 	Bloco inimigo, projetil_ini;
 	inimigo.x = Width*0.85;
 	inimigo.y = Height*0.75;
@@ -217,7 +222,7 @@ int main(int argc, char* args[]){
 	projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 	projetil_ini.comp = inimigo.comp;
 	projetil_ini.alt = inimigo.alt/7;
-	float vida_ini = VIDA;
+	float vida_ini = VIDA_RYU;
 	
 	// Array do cenario
 	Bloco blocos[QUANT_BLOCOS];
@@ -233,6 +238,32 @@ int main(int argc, char* args[]){
 	float y_ryu = RYU_Y*2;
 	float x_ken = KEN_X;
 	float y_ken = KEN_Y*2;
+	
+	// Variaveis para inicializar o audio
+	int frequencia = 22050;
+	Uint16 formato = AUDIO_S16SYS;
+	int canal = 2;
+	int buffer = 4096;
+	
+	// Inicializa o audio
+	Mix_OpenAudio(frequencia, formato, canal, buffer);
+	
+	Mix_Music * tema_ryu; // Variavel para a musica do Ryu
+	Mix_Chunk * hadouken_ryu; // Variavel para o som do hadouken do Ryu
+	Mix_Music * tema_ken; // Variavel para a musica do Ken
+	Mix_Chunk * hadouken_ken; // Variavel para o som do hadouken do Ken
+	
+	// Armazena a musica do Ryu
+	tema_ryu = Mix_LoadMUS("Ryu_Stage.mp3");
+	// Armazena o som do hadouken do Ryu
+	hadouken_ryu = Mix_LoadWAV("Ryu_Hadouken.wav");
+	// Armazena a musica do Ken
+	tema_ken = Mix_LoadMUS("Ken_Stage.mp3");
+	// Armazena o som do hadouken do Ken
+	hadouken_ken = Mix_LoadWAV("Ken_Hadouken.wav");
+	
+	// Reproduz a musica do Ryu
+	Mix_PlayMusic(tema_ryu, -1);
 	
 	// Loop do jogo
 	while(executando && vida_per>0 && vida_ini>0){
@@ -270,6 +301,17 @@ int main(int argc, char* args[]){
 				// Caso o espaco seja pressionado
 				else if(eventos.key.keysym.sym == SDLK_SPACE){
 					atq_per = true;
+					Mix_PlayChannel(-1, hadouken_ryu, 0);
+				}
+				// Caso o F1 seja pressionado
+				else if(eventos.key.keysym.sym == SDLK_F1){
+					// Reproduz a musica do Ryu	
+					Mix_PlayMusic(tema_ryu, -1);
+				}
+				// Caso o F2 seja pressionado
+				else if(eventos.key.keysym.sym == SDLK_F2){
+					// Reproduz a musica do Ken
+					Mix_PlayMusic(tema_ken, -1);
 				}
 				
 				// --- KEYBINDS DO KEN ---
@@ -292,6 +334,7 @@ int main(int argc, char* args[]){
 				// Caso o backspace seja pressionado
 				else if(eventos.key.keysym.sym == SDLK_BACKSPACE){
 					atq_ini = true;
+					Mix_PlayChannel(-1, hadouken_ken, 0);
 				}
 			}
 			// Caso uma tecla seja solta
@@ -525,7 +568,18 @@ int main(int argc, char* args[]){
 		SDL_GL_SwapBuffers();
 		// --- RENDERIZACAO ---
 	}
+	// Libera a musica do Ryu
+	Mix_FreeMusic(tema_ryu);
+	// Libera o som do Hadouken do Ryu
+	Mix_FreeChunk(hadouken_ryu);
+	// Libera a musica do Ken
+	Mix_FreeMusic(tema_ken);
+	// Libera o som do Hadouken do Ken
+	Mix_FreeChunk(hadouken_ken);
+	// Fecha o audio
+	Mix_CloseAudio();
 	
+	// Fecha a janela SDL
 	SDL_Quit();
 	
 	return 0;
