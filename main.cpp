@@ -188,57 +188,6 @@ int main(int argc, char* args[]){
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	// Variaveis de auxilio
-	bool executando = true;
-	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false;
-	bool atq_per = false, atq_ini = false;
-	unsigned int projetil_per_textura = loadTexture("Hadouken.png");
-	unsigned int projetil_ini_textura = loadTexture("Hadouken-2.png");
-	unsigned int ryu_1 = loadTexture("Ryu.png");
-	unsigned int ken_1 = loadTexture("Ken.png");
-	
-	// Variavel para controlar os eventos da janela
-	SDL_Event eventos;
-	
-	// Variaveis do Ryu
-	Bloco personagem, projetil_per;
-	personagem.x = Width*0.05;
-	personagem.y = Height*0.7;
-	personagem.comp = Width*0.1;
-	personagem.alt = Height*0.3;
-	projetil_per.x = personagem.x+personagem.comp;
-	projetil_per.y = (personagem.y+(personagem.alt)/2);
-	projetil_per.comp = personagem.comp;
-	projetil_per.alt = personagem.alt/8;
-	float vida_per = VIDA_RYU;
-	
-	// Variaveis do Ken
-	Bloco inimigo, projetil_ini;
-	inimigo.x = Width*0.85;
-	inimigo.y = Height*0.75;
-	inimigo.comp = Width*0.1;
-	inimigo.alt = Height*0.25;
-	projetil_ini.x = inimigo.x-inimigo.comp;
-	projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
-	projetil_ini.comp = inimigo.comp;
-	projetil_ini.alt = inimigo.alt/7;
-	float vida_ini = VIDA_RYU;
-	
-	// Array do cenario
-	Bloco blocos[QUANT_BLOCOS];
-	for(int i = 0, x = 0, y = Height; i < QUANT_BLOCOS; i++, x += Width/QUANT_BLOCOS){
-		blocos[i].x = x;
-		blocos[i].y = y;
-		blocos[i].comp = Width*0.2;
-		blocos[i].alt = Height*0.2;
-	}
-	
-	// Variaveis para controlar a exibicao das texturas
-	float x_ryu = RYU_X;
-	float y_ryu = RYU_Y*2;
-	float x_ken = KEN_X;
-	float y_ken = KEN_Y*2;
-	
 	// Variaveis para inicializar o audio
 	int frequencia = 22050;
 	Uint16 formato = AUDIO_S16SYS;
@@ -264,6 +213,59 @@ int main(int argc, char* args[]){
 	
 	// Reproduz a musica do Ryu
 	Mix_PlayMusic(tema_ryu, -1);
+	
+	// Variaveis de auxilio
+	bool executando = true;
+	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false;
+	bool atq_per = false, atq_ini = false;
+	unsigned int projetil_per_textura = loadTexture("Hadouken.png");
+	unsigned int projetil_ini_textura = loadTexture("Hadouken-2.png");
+	unsigned int ryu_1 = loadTexture("Ryu.png");
+	unsigned int ryu_2 = loadTexture("Ryu-2.png");
+	unsigned int ken_1 = loadTexture("Ken.png");
+	unsigned int ken_2 = loadTexture("Ken-2.png");
+	
+	// Variavel para controlar os eventos da janela
+	SDL_Event eventos;
+	
+	// Variaveis do Ryu
+	Bloco personagem, projetil_per;
+	personagem.x = Width*0.05;
+	personagem.y = Height*0.7;
+	personagem.comp = Width*0.1;
+	personagem.alt = Height*0.3;
+	projetil_per.x = personagem.x+personagem.comp;
+	projetil_per.y = (personagem.y+(personagem.alt)/2);
+	projetil_per.comp = personagem.comp;
+	projetil_per.alt = personagem.alt/8;
+	float vida_per = VIDA_RYU;
+	
+	// Variaveis do Ken
+	Bloco inimigo, projetil_ini;
+	inimigo.x = Width*0.85;
+	inimigo.y = Height*0.77;
+	inimigo.comp = Width*0.1;
+	inimigo.alt = Height*0.23;
+	projetil_ini.x = inimigo.x-inimigo.comp;
+	projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
+	projetil_ini.comp = inimigo.comp;
+	projetil_ini.alt = inimigo.alt/7;
+	float vida_ini = VIDA_RYU;
+	
+	// Array do cenario
+	Bloco blocos[QUANT_BLOCOS];
+	for(int i = 0, x = 0, y = Height; i < QUANT_BLOCOS; i++, x += Width/QUANT_BLOCOS){
+		blocos[i].x = x;
+		blocos[i].y = y;
+		blocos[i].comp = Width*0.2;
+		blocos[i].alt = Height*0.2;
+	}
+	
+	// Variaveis para controlar a exibicao das texturas
+	float x_ryu = RYU_X;
+	float y_ryu = RYU_Y*2;
+	float x_ken = KEN_X;
+	float y_ken = KEN_Y*2;
 	
 	// Loop do jogo
 	while(executando && vida_per>0 && vida_ini>0){
@@ -303,16 +305,6 @@ int main(int argc, char* args[]){
 					atq_per = true;
 					Mix_PlayChannel(-1, hadouken_ryu, 0);
 				}
-				// Caso o F1 seja pressionado
-				else if(eventos.key.keysym.sym == SDLK_F1){
-					// Reproduz a musica do Ryu	
-					Mix_PlayMusic(tema_ryu, -1);
-				}
-				// Caso o F2 seja pressionado
-				else if(eventos.key.keysym.sym == SDLK_F2){
-					// Reproduz a musica do Ken
-					Mix_PlayMusic(tema_ken, -1);
-				}
 				
 				// --- KEYBINDS DO KEN ---
 				// Caso a seta da esquerda seja pressionada
@@ -335,6 +327,18 @@ int main(int argc, char* args[]){
 				else if(eventos.key.keysym.sym == SDLK_BACKSPACE){
 					atq_ini = true;
 					Mix_PlayChannel(-1, hadouken_ken, 0);
+				}
+				
+				// --- MUDAR A MUSICA ---
+				// Caso o F1 seja pressionado
+				if(eventos.key.keysym.sym == SDLK_F1){
+					// Reproduz a musica do Ryu	
+					Mix_PlayMusic(tema_ryu, -1);
+				}
+				// Caso o F2 seja pressionado
+				if(eventos.key.keysym.sym == SDLK_F2){
+					// Reproduz a musica do Ken
+					Mix_PlayMusic(tema_ken, -1);
 				}
 			}
 			// Caso uma tecla seja solta
@@ -380,7 +384,7 @@ int main(int argc, char* args[]){
 		
 		// --- LOGICA ---
 		
-		// --- MOVIMENTO DO Ryu ---
+		// --- MOVIMENTO DO RYU ---
 		if(esq_per == true){
 			personagem.x -= 8;
 			if(atq_per == false){
@@ -422,9 +426,9 @@ int main(int argc, char* args[]){
 		else if(personagem.x<0){
 			personagem.x = 0;
 		}
-		// --- MOVIMENTO DO Ryu ---
+		// --- MOVIMENTO DO RYU ---
 		
-		// --- MOVIMENTO DO Ken ---
+		// --- MOVIMENTO DO KEN ---
 		if(esq_ini == true){
 			inimigo.x -= 8;
 			if(atq_ini == false){
@@ -452,13 +456,13 @@ int main(int argc, char* args[]){
 			}
 		}
 		else if(cima_ini == true){
-			if(inimigo.y > Height*0.55){
+			if(inimigo.y > Height*0.57){
 				inimigo.y -= 8;
 				if(atq_ini == false){
 					projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 				}
 			}
-			else if(inimigo.y <= Height*0.55)
+			else if(inimigo.y <= Height*0.57)
 				cima_ini = false;
 		}
 		// Evitar que o Ken saia da tela
@@ -468,7 +472,7 @@ int main(int argc, char* args[]){
 		else if(inimigo.x<0){
 			inimigo.x = 0;
 		}
-		// --- MOVIMENTO DO Ken ---
+		// --- MOVIMENTO DO KEN ---
 		
 		// COLISAO
 		if (colisao(personagem, inimigo) == true){
@@ -505,13 +509,29 @@ int main(int argc, char* args[]){
 		
 		// --- DESENHA O RYU ---
 		glColor3f(1, 1, 1);
-		desenhaPersonagem(personagem, ryu_1, x_ryu-RYU_X, x_ryu, y_ryu-RYU_Y, y_ryu);
+		// Altera a textura do Ryu caso ele tenha usado o Hadouken
+		if(atq_per == true){
+			personagem.y = Height*0.77;
+			personagem.alt = Height*0.23;
+			desenhaPersonagem(personagem, ryu_2, 0, 1, 0, 1);
+		}
+		else{
+			personagem.y = Height*0.7;
+			personagem.alt = Height*0.3;
+			desenhaPersonagem(personagem, ryu_1, x_ryu-RYU_X, x_ryu, y_ryu-RYU_Y, y_ryu);
+		}
 		// --- DESENHA O RYU ---
 		
 		
 		// --- DESENHA O KEN ---
 		glColor3f(1, 1, 1);
-		desenhaPersonagem(inimigo, ken_1, x_ken, x_ken-KEN_X, y_ken, y_ken+KEN_Y);	
+		// Altera a textura do Ken caso ele tenha usado o Hadouken
+		if(atq_ini == true){
+			desenhaPersonagem(inimigo, ken_2, 0, 1, 0, 1);
+		}
+		else{
+			desenhaPersonagem(inimigo, ken_1, x_ken, x_ken-KEN_X, y_ken, y_ken+KEN_Y);	
+		}
 		// --- DESENHA O KEN ---
 		
 		// --- CRIA O HADOUKEN DO RYU ---
