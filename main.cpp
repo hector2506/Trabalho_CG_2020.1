@@ -397,7 +397,7 @@ int main(int argc, char* args[]){
 				x_ryu = RYU_X*5;
 			else{
 				x_ryu -= RYU_X;
-				SDL_Delay(50);
+				SDL_Delay(60);
 			}	
 		}
 		else if(dir_per == true){
@@ -409,7 +409,7 @@ int main(int argc, char* args[]){
 				x_ryu = RYU_X;
 			else{
 				x_ryu += RYU_X;
-				SDL_Delay(50);
+				SDL_Delay(60);
 			}
 		}
 		else if(cima_per == true){
@@ -442,7 +442,7 @@ int main(int argc, char* args[]){
 			else{
 				x_ken += KEN_X;
 				if(esq_per == false && dir_per == false)
-					SDL_Delay(50);
+					SDL_Delay(60);
 			}
 		}
 		else if(dir_ini == true){
@@ -455,7 +455,7 @@ int main(int argc, char* args[]){
 			else{
 				x_ken -= KEN_X;
 				if(esq_per == false && dir_per == false)
-					SDL_Delay(50);
+					SDL_Delay(60);
 			}
 		}
 		else if(cima_ini == true){
@@ -517,10 +517,10 @@ int main(int argc, char* args[]){
 			personagem.y = Height*0.77;
 			personagem.alt = Height*0.23;
 			desenhaPersonagem(personagem, ryu_2, 0, 1, 0, 1);
-		}
-		else{
 			personagem.y = Height*0.7;
 			personagem.alt = Height*0.3;
+		}
+		else{
 			desenhaPersonagem(personagem, ryu_1, x_ryu-RYU_X, x_ryu, y_ryu-RYU_Y, y_ryu);
 		}
 		// --- DESENHA O RYU ---
@@ -531,6 +531,8 @@ int main(int argc, char* args[]){
 		// Altera a textura do Ken caso ele tenha usado o Hadouken
 		if(atq_ini == true){
 			desenhaPersonagem(inimigo, ken_2, 0, 1, 0, 1);
+			inimigo.y = Height*0.77;
+			inimigo.alt = Height*0.23;
 		}
 		else{
 			desenhaPersonagem(inimigo, ken_1, x_ken, x_ken-KEN_X, y_ken, y_ken+KEN_Y);	

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project>
-	<Libs Value="-lmingw32 -lSDLMAIN -lSDL -lopengl32 -lglu32 -lglut32 -lSDL_image -lSDL_mixer -lwinmm"/>
+	<Libs Value="-lwinmm -lmingw32 -lopengl32 -lglu32 -lglut32 -lSDLMain -lSDL -lSDL_image -lSDL_mixer"/>
 	<Flags Value=""/>
 	<Target Value="Jogo_SDL.exe"/>
 	<CommandLine Value=""/>
