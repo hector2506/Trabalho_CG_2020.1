@@ -61,9 +61,9 @@ GLuint loadTexture(const std::string&fileName){
 
 // Funcao para detectar colisao
 bool colisao(Bloco A, Bloco B){
-	if(A.y+A.alt < B.y)
+	if(A.y+A.alt <= B.y)
 		return false;
-	else if(A.y > B.y+B.alt)
+	else if(A.y >= B.y+B.alt)
 		return false;
 	else if(A.x+A.comp <= B.x) 
 		return false;
@@ -219,7 +219,7 @@ int main(int argc, char* args[]){
 	
 	// Variaveis de auxilio
 	bool executando = true;
-	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false;
+	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false, caindo_per = false, caindo_ini = false;
 	bool atq_per = false, atq_ini = false;
 	unsigned int projetil_per_textura = loadTexture("images/Hadouken.png");
 	unsigned int projetil_ini_textura = loadTexture("images/Hadouken-2.png");
@@ -254,6 +254,7 @@ int main(int argc, char* args[]){
 	projetil_ini.comp = inimigo.comp;
 	projetil_ini.alt = inimigo.alt/7;
 	float vida_ini = VIDA_RYU;
+	float aux_colisao;
 	
 	// Array do cenario
 	Bloco blocos[QUANT_BLOCOS];
@@ -288,19 +289,19 @@ int main(int argc, char* args[]){
 			if(eventos.type == SDL_KEYDOWN){
 				// --- KEYBINDS DO RYU ---
 				// Caso o a seja pressionado
-				if(eventos.key.keysym.sym == SDLK_a){
+				if(eventos.key.keysym.sym == SDLK_a && caindo_per == false){
 					esq_per = true;
 					x_ryu = RYU_X*5;
 					y_ryu = RYU_Y*2;
 				}
 				// Caso o d seja pressionado
-				else if(eventos.key.keysym.sym == SDLK_d){
+				else if(eventos.key.keysym.sym == SDLK_d && caindo_per == false){
 					dir_per = true;
 					x_ryu = RYU_X*2;
 					y_ryu = RYU_Y*2;
 				}
 				// Caso o w seja pressionado
-				else if(eventos.key.keysym.sym == SDLK_w){
+				else if(eventos.key.keysym.sym == SDLK_w && caindo_per == false){
 					cima_per = true;
 				}
 				// Caso o espaco seja pressionado
@@ -311,19 +312,19 @@ int main(int argc, char* args[]){
 				
 				// --- KEYBINDS DO KEN ---
 				// Caso a seta da esquerda seja pressionada
-				if(eventos.key.keysym.sym == SDLK_LEFT){
+				if(eventos.key.keysym.sym == SDLK_LEFT && caindo_ini == false){
 					esq_ini = true;
 					x_ken = KEN_X;
 					y_ken = KEN_Y*3;
 				}
 				// Caso a seta da direita seja pressionada
-				else if(eventos.key.keysym.sym == SDLK_RIGHT){
+				else if(eventos.key.keysym.sym == SDLK_RIGHT && caindo_ini == false){
 					dir_ini = true;
 					x_ken = KEN_X*4;
 					y_ken = KEN_Y*3;
 				}
 				// Caso a seta de cima seja pressionada
-				else if(eventos.key.keysym.sym == SDLK_UP){
+				else if(eventos.key.keysym.sym == SDLK_UP && caindo_ini == false){
 					cima_ini = true;
 				}
 				// Caso o backspace seja pressionado
@@ -362,6 +363,7 @@ int main(int argc, char* args[]){
 				// Caso o w seja solto
 				else if(eventos.key.keysym.sym == SDLK_w){
 					cima_per = false;
+					caindo_per = true;
 				}
 				
 				// --- KEYBINDS DO KEN ---
@@ -380,6 +382,7 @@ int main(int argc, char* args[]){
 				// Caso a seta de cima seja solta
 				else if(eventos.key.keysym.sym == SDLK_UP){
 					cima_ini = false;
+					caindo_ini = true;
 				}
 			}
 		}
@@ -419,8 +422,10 @@ int main(int argc, char* args[]){
 					projetil_per.y = (personagem.y+(personagem.alt)/2);	
 				}
 			}
-			else if(personagem.y <= Height*0.5)
+			else if(personagem.y <= Height*0.5){
 				cima_per = false;
+				caindo_per = true;
+			}
 		}
 		// Evitar que o Ryu saia da tela
 		if(personagem.x>Width-personagem.comp){
@@ -465,8 +470,10 @@ int main(int argc, char* args[]){
 					projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 				}
 			}
-			else if(inimigo.y <= Height*0.57)
+			else if(inimigo.y <= Height*0.57){
 				cima_ini = false;
+				caindo_ini = true;
+			}
 		}
 		// Evitar que o Ken saia da tela
 		if(inimigo.x>Width-inimigo.comp){
@@ -477,20 +484,46 @@ int main(int argc, char* args[]){
 		}
 		// --- MOVIMENTO DO KEN ---
 		
-		// COLISAO
+		// Colisao para os personagens
 		if (colisao(personagem, inimigo) == true){
-			personagem.x = inimigo.x - inimigo.comp;
+			aux_colisao = personagem.x;
+			if(dir_per == true && esq_ini == true){
+				personagem.x = inimigo.x - inimigo.comp;
+				inimigo.x = aux_colisao + personagem.comp;
+			}
+			else if(dir_per == true){
+				personagem.x = inimigo.x - inimigo.comp;
+			}
+			else if(esq_ini == true){
+				inimigo.x = personagem.x + personagem.comp;
+			}
 		}
 		
-		// GRAVIDADE
+		// Colisao para os projeteis
+		if (colisao(projetil_per, projetil_ini) == true && atq_per == true && atq_ini == true){
+			projetil_per.x = personagem.x+personagem.comp;
+			projetil_ini.x = inimigo.x-inimigo.comp;
+			projetil_per.y = (personagem.y+(personagem.alt)/2);
+			projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
+			atq_per = false;
+			atq_ini = false;
+		}
+		
+		// Gravidade
 		for(int i = 0; i < QUANT_BLOCOS; i++){
+			if(personagem.y+personagem.alt >= blocos[i].y){
+				caindo_per = false;
+			}
+			if(inimigo.y+inimigo.alt >= blocos[i].y){
+				caindo_ini = false;
+			}
 			if(personagem.y+personagem.alt <= blocos[i].y){
-				personagem.y += 0.5;
+				personagem.y += 0.2;
 				if(atq_per == false)
 					projetil_per.y = (personagem.y+(personagem.alt)/2);
 			}
 			if(inimigo.y+inimigo.alt <= blocos[i].y){
-				inimigo.y += 0.5;
+				inimigo.y += 0.2;
 				if(atq_ini == false)
 					projetil_ini.y = (inimigo.y+(inimigo.alt)/2);
 			}
