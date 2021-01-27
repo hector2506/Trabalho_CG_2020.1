@@ -14,13 +14,13 @@
 // F1 - Música do Ryu - Nome: Street Fighter Alpha 2 Ryu Theme
 // F2 - Música do Ken - Nome: Street Fighter Alpha 2 Ken Theme
 // *********************************************************************
-#include <SDL/SDL.h>
-#include <SDL/SDL_opengl.h>
+#include "SDL/SDL.h"
+#include "SDL/SDL_opengl.h"
+#include "SDL/SDL_image.h"
+#include "SDL/SDL_mixer.h"
 #include <stdio.h>
-#include <SDL/SDL_image.h>
 #include <stdlib.h>
 #include <string>
-#include <SDL/SDL_mixer.h>
 
 
 #define Width 900 // Largura da janela
@@ -184,6 +184,9 @@ int main(int argc, char* args[]){
 	// Desabilitar o 3D
 	glDisable(GL_DEPTH_TEST);
 	
+	// Ativa o z-buffering, de modo a remover as superfícies escondidas
+    //glEnable(GL_DEPTH_TEST);
+	
 	// Para uso da imagem
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -203,13 +206,13 @@ int main(int argc, char* args[]){
 	Mix_Chunk * hadouken_ken; // Variavel para o som do hadouken do Ken
 	
 	// Armazena a musica do Ryu
-	tema_ryu = Mix_LoadMUS("Ryu_Stage.mp3");
+	tema_ryu = Mix_LoadMUS("audio/Ryu_Stage.mp3");
 	// Armazena o som do hadouken do Ryu
-	hadouken_ryu = Mix_LoadWAV("Ryu_Hadouken.wav");
+	hadouken_ryu = Mix_LoadWAV("audio/Ryu_Hadouken.wav");
 	// Armazena a musica do Ken
-	tema_ken = Mix_LoadMUS("Ken_Stage.mp3");
+	tema_ken = Mix_LoadMUS("audio/Ken_Stage.mp3");
 	// Armazena o som do hadouken do Ken
-	hadouken_ken = Mix_LoadWAV("Ken_Hadouken.wav");
+	hadouken_ken = Mix_LoadWAV("audio/Ken_Hadouken.wav");
 	
 	// Reproduz a musica do Ryu
 	Mix_PlayMusic(tema_ryu, -1);
@@ -218,12 +221,12 @@ int main(int argc, char* args[]){
 	bool executando = true;
 	bool esq_per = false, dir_per = false, cima_per = false, esq_ini = false, dir_ini = false, cima_ini = false;
 	bool atq_per = false, atq_ini = false;
-	unsigned int projetil_per_textura = loadTexture("Hadouken.png");
-	unsigned int projetil_ini_textura = loadTexture("Hadouken-2.png");
-	unsigned int ryu_1 = loadTexture("Ryu.png");
-	unsigned int ryu_2 = loadTexture("Ryu-2.png");
-	unsigned int ken_1 = loadTexture("Ken.png");
-	unsigned int ken_2 = loadTexture("Ken-2.png");
+	unsigned int projetil_per_textura = loadTexture("images/Hadouken.png");
+	unsigned int projetil_ini_textura = loadTexture("images/Hadouken-2.png");
+	unsigned int ryu_1 = loadTexture("images/Ryu.png");
+	unsigned int ryu_2 = loadTexture("images/Ryu-2.png");
+	unsigned int ken_1 = loadTexture("images/Ken.png");
+	unsigned int ken_2 = loadTexture("images/Ken-2.png");
 	
 	// Variavel para controlar os eventos da janela
 	SDL_Event eventos;
