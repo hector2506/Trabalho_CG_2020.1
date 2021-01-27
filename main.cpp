@@ -206,11 +206,11 @@ int main(int argc, char* args[]){
 	Mix_Chunk * hadouken_ken; // Variavel para o som do hadouken do Ken
 	
 	// Armazena a musica do Ryu
-	tema_ryu = Mix_LoadMUS("audio/Ryu_Stage.mp3");
+	tema_ryu = Mix_LoadMUS("audio/Ryu_Stage.ogg");
 	// Armazena o som do hadouken do Ryu
 	hadouken_ryu = Mix_LoadWAV("audio/Ryu_Hadouken.wav");
 	// Armazena a musica do Ken
-	tema_ken = Mix_LoadMUS("audio/Ken_Stage.mp3");
+	tema_ken = Mix_LoadMUS("audio/Ken_Stage.ogg");
 	// Armazena o som do hadouken do Ken
 	hadouken_ken = Mix_LoadWAV("audio/Ken_Hadouken.wav");
 	
